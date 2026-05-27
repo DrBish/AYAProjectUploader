@@ -1,64 +1,88 @@
 exports.handler = async (event) => {
+
   try {
-    const body = JSON.parse(event.body);
 
+    const body = JSON.parse(event.body || "{}");
+
+    // ✅ Validate API key FIRST
+    const apiKey = process.env.TRANSFERNOW_API_KEY;
+
+    if (!apiKey) {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({
+          error: "Missing TRANSFERNOW_API_KEY in environment variables"
+        })
+      };
+    }
+
+    // CALL TRANSFERNOW
     const response = await fetch("https://api.transfernow.net/v1/transfers", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    "x-api-key": process.env.TRANSFERNOW_API_KEY
-  },
-  body: JSON.stringify({
-    files: [{
-      name: body.fileName,
-      size: body.fileSize
-    }]
-  })
-});
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey
+      },
+      body: JSON.stringify({
+        langCode: "en",
+        files: [
+          {
+            name: body.fileName,
+            size: body.fileSize
+          }
+        ],
+        message: "Student upload",
+        subject: "Submission",
+        toEmails: body.email ? [body.email] : []
+      })
+    });
 
-const text = await response.text();
+    const text = await response.text();
 
-console.log("Status:", response.status);
-console.log("Body:", text);
+    console.log("Status:", response.status);
+    console.log("Body:", text);
 
-if (!response.ok) {
-  throw new Error(text || "TransferNow request failed");
-}
+    if (!text) {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({
+          error: "Empty response from TransferNow"
+        })
+      };
+    }
 
-let data;
-try {
-  data = JSON.parse(text);
-} catch (e) {
-  throw new Error("Not JSON: " + text);
-}
-
-const text = await response.text();
-
-console.log("TransferNow raw response:", text);
-
-let data;
-try {
-  data = JSON.parse(text);
-} catch (e) {
-  throw new Error("TransferNow did not return JSON: " + text);
-}
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({
+          error: "Non-JSON response from TransferNow",
+          raw: text
+        })
+      };
+    }
 
     if (!response.ok) {
       return {
         statusCode: response.status,
         body: JSON.stringify({
-          error: data.message || "TransferNow API error"
+          error: data?.message || "TransferNow API error",
+          raw: data
         })
       };
     }
 
+    // Extract upload URL (adjust if API differs)
     const uploadUrl = data?.files?.[0]?.upload_url;
 
     if (!uploadUrl) {
       return {
         statusCode: 500,
         body: JSON.stringify({
-          error: "No uploadUrl returned from TransferNow"
+          error: "No upload URL returned",
+          raw: data
         })
       };
     }
@@ -71,6 +95,9 @@ try {
     };
 
   } catch (err) {
+
+    console.error(err);
+
     return {
       statusCode: 500,
       body: JSON.stringify({
