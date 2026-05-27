@@ -1,10 +1,8 @@
 exports.handler = async (event) => {
-
   try {
-
     const body = JSON.parse(event.body || "{}");
 
-    // ✅ Validate API key FIRST
+    // ✅ Check API key exists
     const apiKey = process.env.TRANSFERNOW_API_KEY;
 
     if (!apiKey) {
@@ -16,7 +14,7 @@ exports.handler = async (event) => {
       };
     }
 
-    // CALL TRANSFERNOW
+    // ✅ Call TransferNow API
     const response = await fetch("https://api.transfernow.net/v1/transfers", {
       method: "POST",
       headers: {
@@ -31,78 +29,36 @@ exports.handler = async (event) => {
             size: body.fileSize
           }
         ],
-        message: "Student upload",
-        subject: "Submission",
+        message: body.message || "Student upload",
+        subject: body.subject || "Submission",
         toEmails: body.email ? [body.email] : []
       })
     });
 
     const text = await response.text();
 
-    console.log("Status:", response.status);
-    console.log("Body:", text);
-
-    if (!text) {
-      return {
-        statusCode: 500,
-        body: JSON.stringify({
-          error: "Empty response from TransferNow"
-        })
-      };
-    }
+    console.log("TransferNow status:", response.status);
+    console.log("TransferNow raw response:", text);
 
     let data;
     try {
-      data = JSON.parse(text);
+      data = text ? JSON.parse(text) : null;
     } catch (e) {
-      return {
-        statusCode: 500,
-        body: JSON.stringify({
-          error: "Non-JSON response from TransferNow",
-          raw: text
-        })
-      };
+      data = { rawText: text };
     }
 
-    if (!response.ok) {
-      return {
-        statusCode: response.status,
-        body: JSON.stringify({
-          error: data?.message || "TransferNow API error",
-          raw: data
-        })
-      };
-    }
-
-    // Extract upload URL (adjust if API differs)
-return {
-  statusCode: 200,
-  body: JSON.stringify({
-    debug: true,
-    rawResponse: data
-  })
-};
-
-    if (!uploadUrl) {
-      return {
-        statusCode: 500,
-        body: JSON.stringify({
-          error: "No upload URL returned",
-          raw: data
-        })
-      };
-    }
-
+    // ❗ DEBUG MODE: return EVERYTHING
     return {
       statusCode: 200,
       body: JSON.stringify({
-        uploadUrl
+        debug: true,
+        status: response.status,
+        data
       })
     };
 
   } catch (err) {
-
-    console.error(err);
+    console.error("Function error:", err);
 
     return {
       statusCode: 500,
