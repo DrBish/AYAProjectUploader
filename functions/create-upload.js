@@ -22,7 +22,16 @@ exports.handler = async (event) => {
       })
     });
 
-    const data = await response.json();
+const text = await response.text();
+
+console.log("TransferNow raw response:", text);
+
+let data;
+try {
+  data = JSON.parse(text);
+} catch (e) {
+  throw new Error("TransferNow did not return JSON: " + text);
+}
 
     if (!response.ok) {
       return {
