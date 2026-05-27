@@ -1,6 +1,6 @@
 # Project Uploader
 
-Can be used for direct student upload of projects with metadata and aknowledged consent which are ultimately stored in *Sharapoint* for review and forward sharing. 
+Can be used for direct student upload of projects with metadata and aknowledged consent which are ultimately stored in *Sharepoint* for review and forward sharing. 
 
 ## POC Design
 
@@ -19,4 +19,4 @@ Move into SharePoint / Windows system
 ```
 
 **TransferNow* is temporary upload engine to be swapped for *AWS* blob storage later  
-**TransferNow* requires use of *Netlify* functions to send request from server rather than browser
+**TransferNow* requires use of *Netlify* functions to send request from server (with API Key as environment variable) rather than browser
