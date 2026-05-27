@@ -20,6 +20,9 @@ exports.handler = async (event) => {
     });
 
     const data = await response.json();
+
+    console.log("TransferNow response:", JSON.stringify(data, null, 2));
+    
     if (!response.ok) {
       return { statusCode: response.status, body: JSON.stringify({ error: data?.message || "API error", raw: data }) };
     }
