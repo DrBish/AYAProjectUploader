@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Academic Year Project Release — EF Education First</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background-color: #fff;
+      color: #222;
+      line-height: 1.7;
+    }
+
+    /* ── Language Bar ── */
+    .lang-bar {
+      background: #f5f5f5;
+      border-bottom: 1px solid #ddd;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .lang-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 9px 13px;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: #666;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+      position: relative;
+      top: 1px;
+    }
+
+    .lang-btn:hover {
+      color: #0056b3;
+      background: #eaf0fb;
+    }
+
+    .lang-btn.active {
+      color: #0056b3;
+      border-bottom-color: #0056b3;
+    }
+
+    .lang-btn .flag {
+      width: 20px;
+      height: 20px;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    .lang-sep {
+      width: 1px;
+      height: 14px;
+      background: #222;
+      margin: 0 2px;
+    }
+
+    /* ── Page Content ── */
+    .page {
+      display: none;
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    .page.active { display: block; }
+
+    .page img {
+      display: block;
+      margin-bottom: 32px;
+    }
+
+    .page h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin-bottom: 30px;
+    }
+
+    .page p {
+      margin-bottom: 24px;
+      font-size: 1rem;
+    }
+
+    hr {
+      margin: 40px 0 20px;
+      border: none;
+      border-top: 1px solid #ccc;
+    }
+
+    .footer {
+      font-size: 0.8rem;
+      color: #666;
+    }
+
+    a {
+      color: #0056b3;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Language Bar ── -->
+<nav class="lang-bar" role="navigation" aria-label="Language selector">
+
+  <button class="lang-btn active" onclick="switchLang('en')" lang="en" aria-label="English">
+    <img class="flag" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f1ec-1f1e7.svg" alt="🇬🇧"> EN
+  </button>
+  <span class="lang-sep" aria-hidden="true"></span>
+  <button class="lang-btn" onclick="switchLang('fr')" lang="fr" aria-label="Français">
+    <img class="flag" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f1eb-1f1f7.svg" alt="🇫🇷"> FR
+  </button>
+  <span class="lang-sep" aria-hidden="true"></span>
+  <button class="lang-btn" onclick="switchLang('de')" lang="de" aria-label="Deutsch">
+    <img class="flag" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f1e9-1f1ea.svg" alt="🇩🇪"> DE
+  </button>
+  <span class="lang-sep" aria-hidden="true"></span>
+  <button class="lang-btn" onclick="switchLang('es')" lang="es" aria-label="Español">
+    <img class="flag" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f1ea-1f1f8.svg" alt="🇪🇸"> ES
+  </button>
+</nav>
+
+
+<!-- ══════════════ ENGLISH ══════════════ -->
+<main id="page-en" class="page active" lang="en">
+
+  <img src="./images/eflogoblue.png" height="100" alt="EF Education First">
+
+  <h1>Academic Year Project Release</h1>
+
+  <p>
+    I hereby grant Signum International AG and its employees and affiliates
+    (collectively, "EF Education First") the right to use a copy of my Academic
+    Year Project and any photographic and video images taken of me.
+    EF Education First has the right to publish, republish, adapt, exhibit,
+    reproduce, modify, make derivative works, distribute, or display these
+    images, videos, voice recordings and quotes in all markets for an unlimited
+    period of time in SoMe/PR/Web/Video, paid online media, print, and in
+    EF Education First schools and offices. I hereby waive any right to inspect
+    or approve the finished, or work in progress, photographs, videos, printed
+    or electronic matter that may be used in conjunction with them now or in
+    the future.
+  </p>
+
+  <p>
+    I understand that EF Education First may license photographic and video
+    images taken of me to education and language training companies with a large
+    customer base in the under 18 age group and which aligns with the values of
+    quality, trust, and responsibility. I therefore confirm that I have not in
+    the past publicly endorsed, participated in marketing for, represent,
+    recommend or work for any organization or brand promoting cigarettes,
+    alcohol, drugs, weapons, gambling, sexual content/products, plastic surgery,
+    or extreme political or religious movements or act in a manner tending to be
+    offensive to decency, morality, or social propriety, or tending to result in
+    scandal, ridicule or contempt, or tending to provoke any retaliatory action
+    or boycott against myself or EF Education First.
+  </p>
+
+  <p>
+    I can read about the processing of my personal data in the privacy policy
+    available at:
+    <a href="https://www.ef.com/legal/privacy-policy/" target="_blank">
+      www.ef.com/legal/privacy-policy
+    </a>.
+  </p>
+
+  <hr />
+
+  <div class="footer">
+    EF Education First, Selnaustrasse 30, 8001 Zürich —
+    <a href="https://www.ef.com" target="_blank">www.ef.com</a>
+  </div>
+
+</main>
+
+
+<!-- ══════════════ FRENCH ══════════════ -->
+<main id="page-fr" class="page" lang="fr">
+
+  <img src="./images/eflogoblue.png" height="100" alt="EF Education First">
+
+  <h1>Autorisation — Projet de l'Année Académique</h1>
+
+  <p>
+    Je concède par la présente à Signum International AG, à ses employés et à ses
+    sociétés affiliées (collectivement, « EF Education First ») le droit d'utiliser
+    une copie de mon Projet de l'Année Académique ainsi que toute image photographique
+    ou vidéo me représentant. EF Education First a le droit de publier, republier,
+    adapter, exposer, reproduire, modifier, créer des œuvres dérivées, distribuer ou
+    afficher ces images, vidéos, enregistrements vocaux et citations sur tous les
+    marchés, pour une durée illimitée, dans les réseaux sociaux / relations publiques /
+    web / vidéo, les médias en ligne payants, les supports imprimés, ainsi que dans les
+    écoles et bureaux d'EF Education First. Je renonce par la présente à tout droit
+    d'inspecter ou d'approuver les photographies, vidéos, documents imprimés ou
+    électroniques terminés ou en cours d'élaboration susceptibles d'être utilisés en
+    lien avec ceux-ci, maintenant ou à l'avenir.
+  </p>
+
+  <p>
+    Je comprends qu'EF Education First peut accorder une licence sur les images
+    photographiques et vidéo me représentant à des entreprises d'enseignement et de
+    formation linguistique dont la clientèle principale est composée de personnes de
+    moins de 18 ans et qui partagent les valeurs de qualité, de confiance et de
+    responsabilité. Je confirme en conséquence que je n'ai pas, par le passé,
+    publiquement soutenu, participé à des actions de marketing, représenté, recommandé
+    ou travaillé pour toute organisation ou marque faisant la promotion du tabac,
+    de l'alcool, des drogues, des armes, des jeux d'argent, de contenus ou produits
+    sexuels, de la chirurgie esthétique, ou de mouvements politiques ou religieux
+    extrêmes ; je n'ai pas non plus adopté de comportements susceptibles de porter
+    atteinte à la décence, à la moralité ou aux convenances sociales, de provoquer
+    un scandale, des moqueries ou du mépris, ou d'entraîner des représailles ou un
+    boycott à mon encontre ou à l'encontre d'EF Education First.
+  </p>
+
+  <p>
+    Je peux consulter les informations relatives au traitement de mes données
+    personnelles dans la politique de confidentialité disponible à l'adresse :
+    <a href="https://www.ef.com/legal/privacy-policy/" target="_blank">
+      www.ef.com/legal/privacy-policy
+    </a>.
+  </p>
+
+  <hr />
+
+  <div class="footer">
+    EF Education First, Selnaustrasse 30, 8001 Zürich —
+    <a href="https://www.ef.com" target="_blank">www.ef.com</a>
+  </div>
+
+</main>
+
+
+<!-- ══════════════ GERMAN ══════════════ -->
+<main id="page-de" class="page" lang="de">
+
+  <img src="./images/eflogoblue.png" height="100" alt="EF Education First">
+
+  <h1>Freigabe — Akademisches Jahresprojekt</h1>
+
+  <p>
+    Ich gewähre hiermit Signum International AG sowie deren Mitarbeitern und verbundenen
+    Unternehmen (gemeinsam „EF Education First") das Recht, eine Kopie meines
+    Akademischen Jahresprojekts sowie fotografische und filmische Aufnahmen meiner
+    Person zu verwenden. EF Education First ist berechtigt, diese Bilder, Videos,
+    Sprachaufnahmen und Zitate in allen Märkten für einen unbegrenzten Zeitraum zu
+    veröffentlichen, erneut zu veröffentlichen, anzupassen, auszustellen, zu
+    reproduzieren, zu bearbeiten, abgeleitete Werke zu erstellen, zu verbreiten oder
+    anzuzeigen – in sozialen Medien / PR / Web / Video, bezahlten Online-Medien, im
+    Druck sowie in Schulen und Büros von EF Education First. Ich verzichte hiermit auf
+    jedes Recht, fertige oder in Bearbeitung befindliche Fotografien, Videos, gedruckte
+    oder elektronische Materialien, die in Verbindung damit verwendet werden können,
+    zu prüfen oder zu genehmigen – weder jetzt noch in der Zukunft.
+  </p>
+
+  <p>
+    Ich verstehe, dass EF Education First fotografische und filmische Aufnahmen meiner
+    Person an Bildungs- und Sprachtrainingszentren mit einer großen Kundenbasis
+    im Bereich der unter 18-Jährigen lizenzieren kann, die den Werten Qualität,
+    Vertrauen und Verantwortung entsprechen. Ich bestätige daher, dass ich in der
+    Vergangenheit keine Organisation oder Marke öffentlich unterstützt, an deren
+    Marketing teilgenommen, diese vertreten, empfohlen oder für diese gearbeitet habe,
+    die Zigaretten, Alkohol, Drogen, Waffen, Glücksspiel, sexuelle Inhalte/Produkte,
+    Schönheitschirurgie oder extreme politische oder religiöse Bewegungen bewirbt,
+    und dass ich mich nicht in einer Weise verhalten habe, die geeignet ist, gegen
+    Anstand, Moral oder gesellschaftliche Normen zu verstoßen, Skandale, Spott oder
+    Verachtung hervorzurufen oder Vergeltungsmaßnahmen oder Boykottaktionen gegen
+    mich oder EF Education First auszulösen.
+  </p>
+
+  <p>
+    Informationen zur Verarbeitung meiner personenbezogenen Daten finde ich in der
+    Datenschutzrichtlinie unter:
+    <a href="https://www.ef.com/legal/privacy-policy/" target="_blank">
+      www.ef.com/legal/privacy-policy
+    </a>.
+  </p>
+
+  <hr />
+
+  <div class="footer">
+    EF Education First, Selnaustrasse 30, 8001 Zürich —
+    <a href="https://www.ef.com" target="_blank">www.ef.com</a>
+  </div>
+
+</main>
+
+
+<!-- ══════════════ SPANISH ══════════════ -->
+<main id="page-es" class="page" lang="es">
+
+  <img src="./images/eflogoblue.png" height="100" alt="EF Education First">
+
+  <h1>Autorización — Proyecto del Año Académico</h1>
+
+  <p>
+    Por medio de la presente, otorgo a Signum International AG, a sus empleados y
+    afiliados (colectivamente, "EF Education First") el derecho a utilizar una copia
+    de mi Proyecto del Año Académico y cualquier imagen fotográfica o de video tomada
+    de mí. EF Education First tiene el derecho de publicar, republicar, adaptar,
+    exhibir, reproducir, modificar, crear obras derivadas, distribuir o mostrar estas
+    imágenes, videos, grabaciones de voz y citas en todos los mercados por un período
+    de tiempo ilimitado en redes sociales / PR / Web / Video, medios en línea de pago,
+    medios impresos y en las escuelas y oficinas de EF Education First. Por la presente,
+    renuncio a cualquier derecho de inspeccionar o aprobar las fotografías, videos,
+    materiales impresos o electrónicos terminados o en curso de elaboración que puedan
+    usarse en conjunto con estos materiales ahora o en el futuro.
+  </p>
+
+  <p>
+    Entiendo que EF Education First puede licenciar imágenes fotográficas y de video
+    tomadas de mí a empresas de educación y formación en idiomas con una amplia base
+    de clientes en el grupo de edad menor de 18 años y que comparten los valores de
+    calidad, confianza y responsabilidad. Por lo tanto, confirmo que en el pasado no
+    he respaldado públicamente, participado en marketing, representado, recomendado ni
+    trabajado para ninguna organización o marca que promocione cigarrillos, alcohol,
+    drogas, armas, juegos de azar, contenido/productos sexuales, cirugía plástica o
+    movimientos políticos o religiosos extremistas, ni he actuado de manera que tienda
+    a ser ofensiva para la decencia, la moral o la corrección social, que tienda a
+    provocar escándalos, ridículo o desprecio, o que tienda a provocar acciones de
+    represalia o boicot en mi contra o contra EF Education First.
+  </p>
+
+  <p>
+    Puedo leer sobre el tratamiento de mis datos personales en la política de
+    privacidad disponible en:
+    <a href="https://www.ef.com/legal/privacy-policy/" target="_blank">
+      www.ef.com/legal/privacy-policy
+    </a>.
+  </p>
+
+  <hr />
+
+  <div class="footer">
+    EF Education First, Selnaustrasse 30, 8001 Zürich —
+    <a href="https://www.ef.com" target="_blank">www.ef.com</a>
+  </div>
+
+</main>
+
+
+<script>
+  function switchLang(lang) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('page-' + lang).classList.add('active');
+    document.querySelector('.lang-btn[lang="' + lang + '"]').classList.add('active');
+    document.documentElement.lang = lang;
+    if (history.replaceState) {
+      const url = new URL(window.location);
+      url.searchParams.set('lang', lang);
+      history.replaceState(null, '', url);
+    }
+  }
+
+  (function () {
+    const params = new URLSearchParams(window.location.search);
+    const lang = params.get('lang');
+    if (lang && ['en','fr','de','es'].includes(lang)) switchLang(lang);
+  })();
+</script>
+
+</body>
+</html>
