@@ -173,89 +173,107 @@ document
   e.preventDefault();
 
   const file = document.getElementById("file").files[0];
-
   if (!file) {
     status.innerText = "Please select a file.";
     return;
   }
 
   const submissionId = generateSubmissionId();
-
+  submitBtn.disabled = true;
   status.innerText = "Preparing upload...";
+  progressBar.style.display = "block";
+  progressBar.value = 0;
 
   try {
 
-    // STEP 1 — Ask Netlify Function for upload session
-    const setupRes = await fetch(
-      "/.netlify/functions/create-upload",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          submissionId,
-          name: document.getElementById("name").value,
-          email: document.getElementById("email").value,
-          course: document.getElementById("course").value,
-          fileName: file.name,
-          fileSize: file.size
-        })
-      }
-    );
-
-    const setupData = await setupRes.json();
-
-    if (!setupRes.ok) {
-      throw new Error(
-        setupData.error || "Upload setup failed"
-      );
-    }
-
-    // STEP 2 — Upload directly to TransferNow
-    progressBar.style.display = "block";
-
-    const xhr = new XMLHttpRequest();
-
-    xhr.open(
-      "PUT",
-      setupData.uploadUrl
-    );
-
-    xhr.upload.addEventListener("progress", (e) => {
-      if (e.lengthComputable) {
-        const percent =
-          Math.round((e.loaded / e.total) * 100);
-
-        progressBar.value = percent;
-
-        status.innerText =
-          "Uploading... " + percent + "%";
-      }
+    // STEP 1 — Create transfer, get parts + uploadId
+    const setupRes = await fetch("/.netlify/functions/create-upload", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        submissionId,
+        name:   document.getElementById("name").value,
+        email:  document.getElementById("email").value,
+        course: document.getElementById("course").value,
+        fileName: file.name,
+        fileSize:  file.size
+      })
     });
 
-    xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        status.innerText =
-          "Upload complete ✔\n\n" +
-          "Submission ID: " + submissionId;
-      } else {
-        status.innerText =
-          "Upload failed.";
-      }
-    };
+    const setupData = await setupRes.json();
+    if (!setupRes.ok) throw new Error(setupData.error || "Upload setup failed");
 
-    xhr.onerror = () => {
-      status.innerText =
-        "Network error during upload.";
-    };
+    const { transferId, link, fileId, uploadId, parts } = setupData;
+    const encodedUploadId = encodeURIComponent(uploadId);
 
-    xhr.send(file);
+    // STEP 2 — Upload each part directly to S3
+    // We track overall byte progress across all parts
+    let bytesUploaded = 0;
+    const totalBytes = file.size;
+
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i];
+      status.innerText = `Uploading part ${i + 1} of ${parts.length}...`;
+
+      // Get the presigned URL for this part from our proxy function
+      const urlRes = await fetch(
+        `/.netlify/functions/get-part-url?transferId=${transferId}&fileId=${fileId}&partNumber=${part.partNumber}&uploadId=${encodedUploadId}`
+      );
+      const urlData = await urlRes.json();
+      if (!urlRes.ok) throw new Error(urlData.error || `Failed to get URL for part ${part.partNumber}`);
+
+      // Upload the chunk using XHR so we get progress events
+      const chunk = file.slice(part.start, part.start + part.size);
+      const partBytesAtStart = bytesUploaded;
+
+      await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("PUT", urlData.uploadUrl);
+
+        xhr.upload.addEventListener("progress", (ev) => {
+          if (ev.lengthComputable) {
+            const totalUploaded = partBytesAtStart + ev.loaded;
+            const percent = Math.round((totalUploaded / totalBytes) * 100);
+            progressBar.value = percent;
+            status.innerText = `Uploading part ${i + 1} of ${parts.length}... ${percent}%`;
+          }
+        });
+
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            bytesUploaded += part.size;
+            resolve();
+          } else {
+            reject(new Error(`Part ${part.partNumber} upload failed (HTTP ${xhr.status})`));
+          }
+        };
+
+        xhr.onerror = () => reject(new Error(`Network error on part ${part.partNumber}`));
+        xhr.send(chunk);
+      });
+    }
+
+    // STEP 3 — Tell TransferNow all parts are done
+    status.innerText = "Finalising upload...";
+    const finalRes = await fetch("/.netlify/functions/finalize-upload", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ transferId, fileId, uploadId })
+    });
+
+    const finalData = await finalRes.json();
+    if (!finalRes.ok) throw new Error(finalData.error || "Finalise failed");
+
+    progressBar.value = 100;
+    status.innerText =
+      "Upload complete ✔\n\n" +
+      "Submission ID: " + submissionId + "\n" +
+      "Download link: " + link;
 
   } catch (err) {
     console.error(err);
-    status.innerText =
-      "Error: " + err.message;
+    status.innerText = "Error: " + err.message;
+    submitBtn.disabled = false;
   }
 
 });
