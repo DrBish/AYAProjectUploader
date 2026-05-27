@@ -75,7 +75,13 @@ exports.handler = async (event) => {
     }
 
     // Extract upload URL (adjust if API differs)
-    const uploadUrl = data?.files?.[0]?.upload_url;
+return {
+  statusCode: 200,
+  body: JSON.stringify({
+    debug: true,
+    rawResponse: data
+  })
+};
 
     if (!uploadUrl) {
       return {
