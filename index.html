@@ -48,6 +48,16 @@
       box-sizing: border-box;
     }
 
+    select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+
     .terms {
       margin-top: 18px;
       display: flex;
@@ -103,30 +113,38 @@
 
 <div class="card">
 
-  <img
-    src="./images/eflogogradient.avif"
-    class="logo"
-    alt="Logo"
-  />
+  <img src="./images/eflogogradient.avif" class="logo" alt="Logo"/>
 
   <h2>Student Upload Portal</h2>
+
+  <!-- 🔵 Hidden Netlify Form -->
+  <form name="submission" method="POST" data-netlify="true" hidden>
+    <input type="hidden" name="form-name" value="submission" />
+    <input type="text" name="submissionId" />
+    <input type="text" name="projectName" />
+    <input type="text" name="name" />
+    <input type="text" name="email" />
+    <input type="text" name="campus" />
+    <input type="text" name="programmeStart" />
+    <input type="text" name="transferLink" />
+  </form>
 
   <form id="uploadForm">
 
     <label>Project Name</label>
-    <input type="text" id="projectName" required />  
+    <input type="text" id="projectName" required />
 
     <label>Student name(s)</label>
     <input type="text" id="name" required />
 
     <label>Email</label>
-    <input type="email(s)" id="email" required />
+    <input type="email" id="email" required />
 
     <div style="display:flex; gap:15px; margin-top:15px;">
       <div style="flex:1;">
         <label style="margin-top:0;">EF Campus</label>
-        <select id="campus" style="width:100%; padding:10px; margin-top:5px; border-radius:6px; border:1px solid #ccc; box-sizing:border-box; font-size:14px;">
-         <option value="">— Select —</option>
+        <select id="campus">
+          <option value="">— Select —</option>
           <option value="NZ-AUC">Auckland</option>
           <option value="ES-BAR">Barcelona</option>
           <option value="DE-BER">Berlin</option>
@@ -162,14 +180,15 @@
           <option value="CA-VAN">Vancouver</option> 
         </select>
       </div>
+
       <div style="flex:1;">
         <label style="margin-top:0;">Programme Start</label>
-        <select id="programmeStart" style="width:100%; padding:10px; margin-top:5px; border-radius:6px; border:1px solid #ccc; box-sizing:border-box; font-size:14px;">
+        <select id="programmeStart">
           <option value="">— Select —</option>
-          <option value="YE1125">November 2025</option> 
+          <option value="YE1125">November 2025</option>
           <option value="YE0126">January 2026</option>
-          <option value="YE0426">April 2026</option> 
-          <option value="YE0426">June 2026</option> 
+          <option value="YE0426">April 2026</option>
+          <option value="YE0626">June 2026</option>
           <option value="YE0926">September 2026</option>
         </select>
       </div>
@@ -181,23 +200,14 @@
     <div class="terms">
       <input type="checkbox" id="consent" />
       <label for="consent">
-        I have read and accept the
-        <a href="./release_agreement.html" target="_blank">
-          Terms & Conditions
-        </a>
+        I accept the
+        <a href="./release_agreement.html" target="_blank">Terms & Conditions</a>
       </label>
     </div>
 
-    <button id="submitBtn" disabled>
-      Upload Submission
-    </button>
+    <button id="submitBtn" disabled>Upload Submission</button>
 
-    <progress
-      id="progressBar"
-      value="0"
-      max="100"
-      style="display:none;"
-    ></progress>
+    <progress id="progressBar" value="0" max="100" style="display:none;"></progress>
 
     <div class="status" id="status"></div>
 
@@ -219,110 +229,106 @@ function generateSubmissionId() {
   return "SUB-" + Date.now().toString(36).toUpperCase();
 }
 
-document
-  .getElementById("uploadForm")
-  .addEventListener("submit", async (e) => {
+document.getElementById("uploadForm").addEventListener("submit", async (e) => {
 
   e.preventDefault();
 
   const file = document.getElementById("file").files[0];
-  if (!file) {
-    status.innerText = "Please select a file.";
-    return;
-  }
+  if (!file) return;
 
   const submissionId = generateSubmissionId();
+
   submitBtn.disabled = true;
   status.innerText = "Preparing upload...";
   progressBar.style.display = "block";
-  progressBar.value = 0;
 
   try {
 
-    // STEP 1 — Create transfer, get parts + uploadId
     const setupRes = await fetch("/.netlify/functions/create-upload", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         submissionId,
-        name:   document.getElementById("name").value,
-        email:  document.getElementById("email").value,
+        name: document.getElementById("name").value,
+        email: document.getElementById("email").value,
         campus: document.getElementById("campus").value,
-          programmeStart: document.getElementById("programmeStart").value,
+        programmeStart: document.getElementById("programmeStart").value,
         fileName: file.name,
-        fileSize:  file.size
+        fileSize: file.size
       })
     });
 
     const setupData = await setupRes.json();
-    if (!setupRes.ok) throw new Error(setupData.error || "Upload setup failed");
+    if (!setupRes.ok) throw new Error(setupData.error);
 
     const { transferId, link, fileId, uploadId, parts } = setupData;
-    const encodedUploadId = encodeURIComponent(uploadId);
 
-    // STEP 2 — Upload each part directly to S3
-    // We track overall byte progress across all parts
     let bytesUploaded = 0;
     const totalBytes = file.size;
 
     for (let i = 0; i < parts.length; i++) {
+
       const part = parts[i];
-      status.innerText = `Uploading part ${i + 1} of ${parts.length}...`;
 
-      // Get the presigned URL for this part from our proxy function
       const urlRes = await fetch(
-        `/.netlify/functions/get-part-url?transferId=${transferId}&fileId=${fileId}&partNumber=${part.partNumber}&uploadId=${encodedUploadId}`
+        `/.netlify/functions/get-part-url?transferId=${transferId}&fileId=${fileId}&partNumber=${part.partNumber}&uploadId=${encodeURIComponent(uploadId)}`
       );
-      const urlData = await urlRes.json();
-      if (!urlRes.ok) throw new Error(urlData.error || `Failed to get URL for part ${part.partNumber}`);
 
-      // Upload the chunk using XHR so we get progress events
+      const urlData = await urlRes.json();
+
       const chunk = file.slice(part.start, part.start + part.size);
-      const partBytesAtStart = bytesUploaded;
+      const partStart = bytesUploaded;
 
       await new Promise((resolve, reject) => {
+
         const xhr = new XMLHttpRequest();
         xhr.open("PUT", urlData.uploadUrl);
 
-        xhr.upload.addEventListener("progress", (ev) => {
-          if (ev.lengthComputable) {
-            const totalUploaded = partBytesAtStart + ev.loaded;
-            const percent = Math.round((totalUploaded / totalBytes) * 100);
-            progressBar.value = percent;
-            status.innerText = `Uploading part ${i + 1} of ${parts.length}... ${percent}%`;
-          }
-        });
-
-        xhr.onload = () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            bytesUploaded += part.size;
-            resolve();
-          } else {
-            reject(new Error(`Part ${part.partNumber} upload failed (HTTP ${xhr.status})`));
-          }
+        xhr.upload.onprogress = (ev) => {
+          const total = partStart + ev.loaded;
+          progressBar.value = Math.round((total / totalBytes) * 100);
         };
 
-        xhr.onerror = () => reject(new Error(`Network error on part ${part.partNumber}`));
+        xhr.onload = () => {
+          bytesUploaded += part.size;
+          resolve();
+        };
+
+        xhr.onerror = reject;
+
         xhr.send(chunk);
       });
     }
 
-    // STEP 3 — Tell TransferNow all parts are done
-    status.innerText = "Finalising upload...";
-    const finalRes = await fetch("/.netlify/functions/finalize-upload", {
+    await fetch("/.netlify/functions/finalize-upload", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ transferId, fileId, uploadId })
     });
 
-    const finalData = await finalRes.json();
-    if (!finalRes.ok) throw new Error(finalData.error || "Finalise failed");
-
+    // ✅ SUCCESS UI
     progressBar.value = 100;
+
     status.innerText =
-      "Upload complete ✔\n\n" +
-      "Submission ID: " + submissionId + "\n" +
-      "Download link: " + link;
+      "Upload complete ✔\n" +
+      "ID: " + submissionId + "\n" +
+      "Link: " + link;
+
+    // -------------------------
+    // NETLIFY FORM SUBMISSION
+    // -------------------------
+    const formData = new FormData();
+    formData.append("form-name", "submission");
+    formData.append("submissionId", submissionId);
+    formData.append("projectName", document.getElementById("projectName").value);
+    formData.append("name", document.getElementById("name").value);
+    formData.append("email", document.getElementById("email").value);
+    formData.append("campus", document.getElementById("campus").value);
+    formData.append("programmeStart", document.getElementById("programmeStart").value);
+    formData.append("transferLink", link);
+
+    fetch("/", { method: "POST", body: formData })
+      .catch(err => console.warn("Netlify form error:", err));
 
   } catch (err) {
     console.error(err);
